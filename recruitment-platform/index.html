@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentMatch - Recruitment Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .card {
+            @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+        }
+        .navbar-link {
+            @apply text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium;
+        }
+        .stats-card {
+            @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex items-center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <i class="fas fa-briefcase text-blue-600 text-2xl"></i>
+                        <span class="ml-2 text-xl font-bold text-gray-900">TalentMatch</span>
+                    </a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4" id="nav-links">
+                    <!-- Navigation links will be populated by JavaScript -->
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200" id="mobile-nav-links">
+                <!-- Mobile navigation links will be populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Content will be dynamically loaded here -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase text-blue-400 text-2xl"></i>
+                        <span class="ml-2 text-xl font-bold">TalentMatch</span>
+                    </div>
+                    <p class="mt-4 text-gray-300 text-sm">
+                        Intelligent recruitment platform connecting employers with top talent through AI-powered matching.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider">Employers</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="quick-match.html" class="text-gray-300 hover:text-white text-sm">Quick Match</a></li>
+                        <li><a href="register.html" class="text-gray-300 hover:text-white text-sm">Sign Up</a></li>
+                        <li><a href="login.html" class="text-gray-300 hover:text-white text-sm">Login</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider">Platform</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">How It Works</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">Pricing</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">API Docs</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider">Support</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">Help Center</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">Contact Us</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white text-sm">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-700">
+                <p class="text-gray-300 text-sm text-center">
+                    &copy; 2024 TalentMatch. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // API Base URL
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // Auth state management
+        let currentUser = JSON.parse(localStorage.getItem('user')) || null;
+        let authToken = localStorage.getItem('token') || null;
+
+        // Page routing
+        const routes = {
+            '/': 'landing',
+            '/login': 'login',
+            '/register': 'register',
+            '/quick-match': 'quick-match',
+            '/employer/dashboard': 'employer-dashboard',
+            '/employer/jobs': 'employer-jobs',
+            '/employer/jobs/create': 'employer-create-job',
+            '/employer/jobs/:id': 'employer-job-details',
+            '/employer/jobs/:id/candidates': 'employer-job-candidates',
+            '/admin/dashboard': 'admin-dashboard'
+        };
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavigation();
+            routeToPage();
+            setupEventListeners();
+        });
+
+        // Navigation initialization
+        function initNavigation() {
+            const navLinks = document.getElementById('nav-links');
+            const mobileNavLinks = document.getElementById('mobile-nav-links');
+            
+            if (currentUser) {
+                // User is logged in
+                if (currentUser.role === 'employer') {
+                    navLinks.innerHTML = `
+                        <a href="employer/dashboard" class="navbar-link">Dashboard</a>
+                        <a href="employer/jobs" class="navbar-link">My Jobs</a>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700 text-sm">${currentUser.name} (${currentUser.role})</span>
+                            <button onclick="logout()" class="flex items-center text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+                                Logout
+                            </button>
+                        </div>
+                    `;
+                    
+                    mobileNavLinks.innerHTML = `
+                        <a href="employer/dashboard" class="block navbar-link">Dashboard</a>
+                        <a href="employer/jobs" class="block navbar-link">My Jobs</a>
+                        <div class="pt-4 border-t border-gray-200">
+                            <span class="block px-3 py-2 text-gray-700 text-sm">${currentUser.name} (${currentUser.role})</span>
+                            <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-red-600 text-sm font-medium">
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+                                Logout
+                            </button>
+                        </div>
+                    `;
+                } else if (currentUser.role === 'admin') {
+                    navLinks.innerHTML = `
+                        <a href="admin/dashboard" class="navbar-link">Admin Dashboard</a>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700 text-sm">${currentUser.name} (${currentUser.role})</span>
+                            <button onclick="logout()" class="flex items-center text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+                                Logout
+                            </button>
+                        </div>
+                    `;
+                    
+                    mobileNavLinks.innerHTML = `
+                        <a href="admin/dashboard" class="block navbar-link">Admin Dashboard</a>
+                        <div class="pt-4 border-t border-gray-200">
+                            <span class="block px-3 py-2 text-gray-700 text-sm">${currentUser.name} (${currentUser.role})</span>
+                            <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-red-600 text-sm font-medium">
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+                                Logout
+                            </button>
+                        </div>
+                    `;
+                }
+            } else {
+                // User is not logged in
+                navLinks.innerHTML = `
+                    <a href="quick-match" class="navbar-link">Quick Match</a>
+                    <a href="login" class="navbar-link">Login</a>
+                    <a href="register" class="btn-primary text-sm">Sign Up</a>
+                `;
+                
+                mobileNavLinks.innerHTML = `
+                    <a href="quick-match" class="block navbar-link">Quick Match</a>
+                    <a href="login" class="block navbar-link">Login</a>
+                    <a href="register" class="block btn-primary text-sm mt-2 text-center">Sign Up</a>
+                `;
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-button').addEventListener('click', function() {
+                const mobileMenu = document.getElementById('mobile-menu');
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Handle navigation clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A' && e.target.getAttribute('href')) {
+                    e.preventDefault();
+                    const href = e.target.getAttribute('href');
+                    navigateTo(href);
+                }
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function() {
+                routeToPage();
+            });
+        }
+
+        // Navigation function
+        function navigateTo(path) {
+            window.history.pushState({}, '', path);
+            routeToPage();
+        }
+
+        // Route to the appropriate page
+        function routeToPage() {
+            const path = window.location.pathname;
+            const mainContent = document.getElementById('main-content');
+            
+            // Default to landing page if path is just "/"
+            const page = path === '/' ? 'landing' : path.substring(1).replace(/\//g, '-');
+            
+            switch(page) {
+                case 'landing':
+                    loadLandingPage(mainContent);
+                    break;
+                case 'login':
+                    loadLoginPage(mainContent);
+                    break;
+                case 'register':
+                    loadRegisterPage(mainContent);
+                    break;
+                case 'quick-match':
+                    loadQuickMatchPage(mainContent);
+                    break;
+                case 'employer-dashboard':
+                    if (!currentUser || currentUser.role !== 'employer') {
+                        navigateTo('login');
+                        return;
+                    }
+                    loadEmployerDashboard(mainContent);
+                    break;
+                case 'employer-jobs':
+                    if (!currentUser || currentUser.role !== 'employer') {
+                        navigateTo('login');
+                        return;
+                    }
+                    loadEmployerJobs(mainContent);
+                    break;
+                case 'employer-jobs-create':
+                    if (!currentUser || currentUser.role !== 'employer') {
+                        navigateTo('login');
+                        return;
+                    }
+                    loadCreateJobPage(mainContent);
+                    break;
+                case 'admin-dashboard':
+                    if (!currentUser || currentUser.role !== 'admin') {
+                        navigateTo('login');
+                        return;
+                    }
+                    loadAdminDashboard(mainContent);
+                    break;
+                default:
+                    // Check if it's a dynamic employer job page
+                    if (page.startsWith('employer-jobs-') && page !== 'employer-jobs-create') {
+                        const jobId = page.replace('employer-jobs-', '');
+                        if (!currentUser || currentUser.role !== 'employer') {
+                            navigateTo('login');
+                            return;
+                        }
+                        loadJobDetailsPage(mainContent, jobId);
+                    } else {
+                        loadLandingPage(mainContent);
+                    }
+            }
+        }
+
+        // API functions
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                ...options
+            };
+
+            if (authToken) {
+                config.headers.Authorization = `Bearer ${authToken}`;
+            }
+
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'API request failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API call error:', error);
+                throw error;
+            }
+        }
+
+        // Auth functions
+        async function login(email, password) {
+            try {
+                const data = await apiCall('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                currentUser = data.user;
+                authToken = data.token;
+                
+                initNavigation();
+                navigateTo('employer/dashboard');
+                
+                return { success: true };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function register(userData) {
+            try {
+                const data = await apiCall('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify(userData)
+                });
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                currentUser = data.user;
+                authToken = data.token;
+                
+                initNavigation();
+                navigateTo('employer/dashboard');
+                
+                return { success: true };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            currentUser = null;
+            authToken = null;
+            
+            initNavigation();
+            navigateTo('/');
+        }
+
+        // Page loading functions
+        function loadLandingPage(container) {
+            container.innerHTML = `
+                <div class="min-h-screen">
+                    <!-- Hero Section -->
+                    <section class="bg-gradient-to-br from-blue-50 to-white py-20">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center">
+                                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                                    Find Your Perfect
+                                    <span class="text-blue-600"> Talent Match</span>
+                                </h1>
+                                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                                    AI-powered recruitment platform that connects employers with qualified candidates instantly. 
+                                    Post jobs, get matches, and hire faster than ever before.
+                                </p>
+                                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                    ${currentUser ? 
+                                        (currentUser.role === 'employer' ? 
+                                            `<a href="employer/dashboard" class="btn-primary text-lg px-8 py-3">Go to Dashboard</a>` :
+                                            `<a href="admin/dashboard" class="btn-primary text-lg px-8 py-3">Admin Dashboard</a>`) :
+                                        `<a href="register" class="btn-primary text-lg px-8 py-3">Get Started Free</a>
+                                         <a href="quick-match" class="btn-secondary text-lg px-8 py-3">Try Quick Match</a>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Stats Section -->
+                    <section class="py-16 bg-white">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                                <div class="p-6">
+                                    <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">50K+</div>
+                                    <div class="text-gray-600">Active Candidates</div>
+                                </div>
+                                <div class="p-6">
+                                    <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">10K+</div>
+                                    <div class="text-gray-600">Successful Matches</div>
+                                </div>
+                                <div class="p-6">
+                                    <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">2.5x</div>
+                                    <div class="text-gray-600">Faster Hiring</div>
+                                </div>
+                                <div class="p-6">
+                                    <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">95%</div>
+                                    <div class="text-gray-600">Employer Satisfaction</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Features Section -->
+                    <section class="py-20 bg-gray-50">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center mb-16">
+                                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose TalentMatch?</h2>
+                                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                                    Our platform combines cutting-edge technology with recruitment expertise to deliver exceptional results.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <div class="card text-center hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-center mb-4">
+                                        <i class="fas fa-search text-blue-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-3">AI-Powered Matching</h3>
+                                    <p class="text-gray-600">
+                                        Advanced algorithms match job requirements with candidate skills and experience.
+                                    </p>
+                                </div>
+                                <div class="card text-center hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-center mb-4">
+                                        <i class="fas fa-users text-blue-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Quality Candidates</h3>
+                                    <p class="text-gray-600">
+                                        Access pre-vetted, qualified candidates with detailed skill profiles.
+                                    </p>
+                                </div>
+                                <div class="card text-center hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-center mb-4">
+                                        <i class="fas fa-bolt text-blue-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Fast Hiring</h3>
+                                    <p class="text-gray-600">
+                                        Reduce time-to-hire with instant candidate matching and ranking.
+                                    </p>
+                                </div>
+                                <div class="card text-center hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-center mb-4">
+                                        <i class="fas fa-chart-bar text-blue-600 text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Data-Driven Insights</h3>
+                                    <p class="text-gray-600">
+                                        Get detailed analytics on candidate matches and market trends.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CTA Section -->
+                    <section class="py-20 bg-blue-600">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Hiring?</h2>
+                            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                                Join thousands of employers who are already finding their perfect matches faster and smarter.
+                            </p>
+                            ${!currentUser ? 
+                                `<a href="register" class="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-3 rounded-lg transition-colors">Start Free Trial</a>` :
+                                ''
+                            }
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function loadLoginPage(container) {
+            container.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-md w-full space-y-8">
+                        <div>
+                            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+                            <p class="mt-2 text-center text-sm text-gray-600">
+                                Or <a href="register" class="font-medium text-blue-600 hover:text-blue-500">create a new employer account</a>
+                            </p>
+                        </div>
+
+                        <form id="login-form" class="mt-8 space-y-6">
+                            <div id="login-error" class="hidden rounded-md bg-red-50 p-4">
+                                <div class="flex">
+                                    <i class="fas fa-exclamation-circle text-red-400 mt-0.5 mr-3"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-red-800" id="error-message"></h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                    <div class="mt-1 relative">
+                                        <input id="email" name="email" type="email" autocomplete="email" required class="input-field pl-10" placeholder="Enter your email">
+                                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                    <div class="mt-1 relative">
+                                        <input id="password" name="password" type="password" autocomplete="current-password" required class="input-field pl-10" placeholder="Enter your password">
+                                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Sign in
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('login-error');
+                const errorMessage = document.getElementById('error-message');
+                
+                const result = await login(email, password);
+                
+                if (!result.success) {
+                    errorMessage.textContent = result.error;
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+        }
+
+        function loadRegisterPage(container) {
+            container.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-md w-full space-y-8">
+                        <div>
+                            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create employer account</h2>
+                            <p class="mt-2 text-center text-sm text-gray-600">
+                                Or <a href="login" class="font-medium text-blue-600 hover:text-blue-500">sign in to your existing account</a>
+                            </p>
+                        </div>
+
+                        <form id="register-form" class="mt-8 space-y-6">
+                            <div id="register-error" class="hidden rounded-md bg-red-50 p-4">
+                                <div class="flex">
+                                    <i class="fas fa-exclamation-circle text-red-400 mt-0.5 mr-3"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-red-800" id="error-message"></h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <div class="mt-1 relative">
+                                        <input id="name" name="name" type="text" required class="input-field pl-10" placeholder="Enter your full name">
+                                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="company" class="block text-sm font-medium text-gray-700">Company</label>
+                                    <div class="mt-1 relative">
+                                        <input id="company" name="company" type="text" required class="input-field pl-10" placeholder="Enter company name">
+                                        <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                    <div class="mt-1 relative">
+                                        <input id="email" name="email" type="email" autocomplete="email" required class="input-field pl-10" placeholder="Enter your email">
+                                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                    <div class="mt-1 relative">
+                                        <input id="phone" name="phone" type="tel" class="input-field pl-10" placeholder="Enter phone number">
+                                        <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                    <div class="mt-1 relative">
+                                        <input id="password" name="password" type="password" autocomplete="new-password" required class="input-field pl-10" placeholder="Enter password (min. 6 characters)">
+                                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                                    <div class="mt-1 relative">
+                                        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required class="input-field pl-10" placeholder="Confirm your password">
+                                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Create account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('register-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    company: document.getElementById('company').value,
+                    phone: document.getElementById('phone').value
+                };
+                
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const errorDiv = document.getElementById('register-error');
+                const errorMessage = document.getElementById('error-message');
+                
+                // Basic validation
+                if (formData.password !== confirmPassword) {
+                    errorMessage.textContent = 'Passwords do not match';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                if (formData.password.length < 6) {
+                    errorMessage.textContent = 'Password must be at least 6 characters long';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                const result = await register(formData);
+                
+                if (!result.success) {
+                    errorMessage.textContent = result.error;
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+        }
+
+        function loadQuickMatchPage(container) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-12">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Quick CV Match</h1>
+                            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                                Paste CV text to instantly find matching job opportunities and get compatibility scores.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-2">
+                                <form id="quick-match-form">
+                                    <div class="card">
+                                        <div class="mb-6">
+                                            <label for="cvText" class="block text-sm font-medium text-gray-700 mb-2">CV Text</label>
+                                            <textarea id="cvText" rows="12" class="input-field resize-none" placeholder="Paste your CV text here (minimum 50 characters)..."></textarea>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <span id="char-count" class="text-sm text-gray-500">0 characters</span>
+                                                <button type="button" id="sample-text-btn" class="text-sm text-blue-600 hover:text-blue-700">Use sample text</button>
+                                            </div>
+                                        </div>
+
+                                        <div id="quick-match-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                                            <p class="text-red-800 text-sm" id="error-message"></p>
+                                        </div>
+
+                                        <button type="submit" class="w-full btn-primary flex items-center justify-center">
+                                            <i class="fas fa-search mr-2"></i>
+                                            Find Matches
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div id="quick-match-results" class="mt-8 hidden">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="card">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                                        How It Works
+                                    </h3>
+                                    <ul class="space-y-3 text-sm text-gray-600">
+                                        <li class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                                            <span>Paste your CV text in the input field</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                                            <span>Our AI analyzes skills, experience, and qualifications</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                                            <span>Get instant matches with compatibility scores</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                                            <span>Review detailed match breakdowns</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div id="cv-analysis" class="card hidden">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                        <i class="fas fa-users text-blue-600 mr-2"></i>
+                                        CV Analysis
+                                    </h3>
+                                    <div class="space-y-3" id="analysis-content">
+                                        <!-- Analysis content will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Character count update
+            document.getElementById('cvText').addEventListener('input', function() {
+                document.getElementById('char-count').textContent = `${this.value.length} characters`;
+                if (this.value.length < 50) {
+                    document.getElementById('char-count').classList.add('text-red-600');
+                    document.getElementById('char-count').classList.remove('text-gray-500');
+                } else {
+                    document.getElementById('char-count').classList.remove('text-red-600');
+                    document.getElementById('char-count').classList.add('text-gray-500');
+                }
+            });
+
+            // Sample text button
+            document.getElementById('sample-text-btn').addEventListener('click', function() {
+                const sampleText = `Experienced JavaScript developer with 5 years of professional experience in React and Node.js. Strong background in building scalable web applications, RESTful APIs, and working with databases like MongoDB and PostgreSQL. Skills include TypeScript, Git, Docker, AWS, and Agile methodologies. Previously worked as a Senior Developer at Tech Company where I led a team of 4 developers and delivered multiple successful projects.`;
+                document.getElementById('cvText').value = sampleText;
+                document.getElementById('cvText').dispatchEvent(new Event('input'));
+            });
+
+            // Form submission
+            document.getElementById('quick-match-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const text = document.getElementById('cvText').value;
+                const errorDiv = document.getElementById('quick-match-error');
+                
+                if (text.length < 50) {
+                    document.getElementById('error-message').textContent = 'Please enter at least 50 characters for meaningful matching';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                errorDiv.classList.add('hidden');
+                
+                try {
+                    const data = await apiCall('/matching/quick-match', {
+                        method: 'POST',
+                        body: JSON.stringify({ text })
+                    });
+                    
+                    displayQuickMatchResults(data);
+                } catch (error) {
+                    document.getElementById('error-message').textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+        }
+
+        function displayQuickMatchResults(data) {
+            const resultsDiv = document.getElementById('quick-match-results');
+            const analysisDiv = document.getElementById('cv-analysis');
+            const analysisContent = document.getElementById('analysis-content');
+            
+            // Display results
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Match Results</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-blue-600 mb-1">${data.total_matches}</div>
+                            <div class="text-sm text-blue-800">Total Matches</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-green-600 mb-1">${Math.max(...data.matches.map(m => m.match_score))}%</div>
+                            <div class="text-sm text-green-800">Best Match</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">${data.cv_analysis.skills_found?.length || 0}</div>
+                            <div class="text-sm text-purple-800">Skills Identified</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        ${data.matches.map(match => `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-900">${match.title}</h3>
+                                    <div class="flex items-center bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+                                        <i class="fas fa-star mr-1"></i>
+                                        ${match.match_score}% Match
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                    <div>Location: ${match.location}</div>
+                                    <div>Skills Match: ${match.skills_match} skills</div>
+                                </div>
+
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-500">${match.company}</span>
+                                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View Details</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            
+            // Display CV analysis
+            if (data.cv_analysis) {
+                analysisContent.innerHTML = `
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Skills Found</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${data.cv_analysis.skills_found?.slice(0, 10).map(skill => `
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${skill}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium">Experience:</span> ${data.cv_analysis.experience_years} years
+                        </div>
+                        <div>
+                            <span class="font-medium">Education:</span> ${data.cv_analysis.education?.length || 0} levels
+                        </div>
+                    </div>
+                `;
+                analysisDiv.classList.remove('hidden');
+            }
+        }
+
+        function loadEmployerDashboard(container) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-8">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <!-- Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900">Employer Dashboard</h1>
+                            <p class="text-gray-600 mt-2">Welcome back! Here's your hiring overview.</p>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="stats-grid">
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-blue-50 text-blue-600 mr-4">
+                                    <i class="fas fa-briefcase text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Jobs</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="total-jobs">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-green-50 text-green-600 mr-4">
+                                    <i class="fas fa-chart-line text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Active Jobs</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="active-jobs">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-purple-50 text-purple-600 mr-4">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Candidates</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="total-candidates">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-orange-50 text-orange-600 mr-4">
+                                    <i class="fas fa-eye text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Avg. Matches per Job</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="avg-matches">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mb-8">
+                            <a href="employer/jobs/create" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i>
+                                Post New Job
+                            </a>
+                        </div>
+
+                        <!-- Recent Jobs -->
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-xl font-semibold text-gray-900">Recent Jobs</h2>
+                                <a href="employer/jobs" class="text-blue-600 hover:text-blue-700 font-medium">View All Jobs</a>
+                            </div>
+
+                            <div id="recent-jobs">
+                                <!-- Jobs will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Load employer dashboard data
+            loadEmployerDashboardData();
+        }
+
+        async function loadEmployerDashboardData() {
+            try {
+                const jobsData = await apiCall('/jobs/my-jobs?page=1&limit=5');
+                
+                // Update stats
+                const totalJobs = jobsData.jobs.length;
+                const totalCandidates = jobsData.jobs.reduce((sum, job) => sum + (job.match_count || 0), 0);
+                const activeJobs = jobsData.jobs.filter(job => job.status === 'active').length;
+                const avgMatches = totalJobs > 0 ? Math.round(totalCandidates / totalJobs) : 0;
+                
+                document.getElementById('total-jobs').textContent = totalJobs;
+                document.getElementById('active-jobs').textContent = activeJobs;
+                document.getElementById('total-candidates').textContent = totalCandidates;
+                document.getElementById('avg-matches').textContent = avgMatches;
+                
+                // Display recent jobs
+                const recentJobsDiv = document.getElementById('recent-jobs');
+                
+                if (jobsData.jobs.length === 0) {
+                    recentJobsDiv.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-briefcase mx-auto text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No jobs posted</h3>
+                            <p class="text-gray-500 mb-4">Get started by posting your first job opening.</p>
+                            <a href="employer/jobs/create" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i>
+                                Post New Job
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    recentJobsDiv.innerHTML = jobsData.jobs.map(job => `
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-medium text-gray-900">${job.title}</h3>
+                                <div class="flex items-center mt-1 text-sm text-gray-600">
+                                    <span class="mr-4">${job.location}</span>
+                                    <span class="px-2 py-1 rounded-full text-xs ${job.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${job.status}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-blue-600">${job.match_count || 0}</div>
+                                    <div class="text-sm text-gray-500">Matches</div>
+                                </div>
+                                
+                                <a href="employer/jobs/${job.id}/candidates" class="btn-primary text-sm py-2 px-4">View Candidates</a>
+                                
+                                <a href="employer/jobs/${job.id}" class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load employer dashboard data:', error);
+            }
+        }
+
+        function loadEmployerJobs(container) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-8">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-center mb-8">
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">My Job Postings</h1>
+                                <p class="text-gray-600 mt-2">Manage your job listings and view candidate matches.</p>
+                            </div>
+                            <a href="employer/jobs/create" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i>
+                                Post New Job
+                            </a>
+                        </div>
+
+                        <div class="card">
+                            <div id="jobs-list">
+                                <!-- Jobs will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            loadEmployerJobsData();
+        }
+
+        async function loadEmployerJobsData() {
+            try {
+                const jobsData = await apiCall('/jobs/my-jobs?page=1&limit=20');
+                const jobsListDiv = document.getElementById('jobs-list');
+                
+                if (jobsData.jobs.length === 0) {
+                    jobsListDiv.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-briefcase text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No jobs posted yet</h3>
+                            <p class="text-gray-500 mb-6">Create your first job posting to start finding candidates.</p>
+                            <a href="employer/jobs/create" class="btn-primary inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i>
+                                Post Your First Job
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    jobsListDiv.innerHTML = `
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matches</th>
+                                        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Posted</th>
+                                        <th class="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${jobsData.jobs.map(job => `
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">${job.title}</div>
+                                                <div class="text-sm text-gray-500">${job.location}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${job.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                                    ${job.status}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${job.match_count || 0}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(job.created_at).toLocaleDateString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <a href="employer/jobs/${job.id}" class="text-blue-600 hover:text-blue-900 mr-4">View</a>
+                                                <a href="employer/jobs/${job.id}/candidates" class="text-green-600 hover:text-green-900">Candidates</a>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to load employer jobs:', error);
+            }
+        }
+
+        function loadCreateJobPage(container) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-8">
+                    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900">Create New Job</h1>
+                            <p class="text-gray-600 mt-2">Post a new job opening to find qualified candidates.</p>
+                        </div>
+
+                        <form id="create-job-form" class="card">
+                            <div id="create-job-error" class="hidden rounded-md bg-red-50 p-4 mb-6">
+                                <div class="flex">
+                                    <i class="fas fa-exclamation-circle text-red-400 mt-0.5 mr-3"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-red-800" id="error-message"></h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+                                    <input type="text" id="title" name="title" required class="input-field" placeholder="e.g. Senior React Developer">
+                                </div>
+
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Job Description *</label>
+                                    <textarea id="description" name="description" rows="5" required class="input-field" placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."></textarea>
+                                </div>
+
+                                <div>
+                                    <label for="requirements" class="block text-sm font-medium text-gray-700 mb-1">Requirements *</label>
+                                    <textarea id="requirements" name="requirements" rows="3" required class="input-field" placeholder="List the required qualifications, experience, and skills..."></textarea>
+                                </div>
+
+                                <div>
+                                    <label for="skills" class="block text-sm font-medium text-gray-700 mb-1">Key Skills (comma separated)</label>
+                                    <input type="text" id="skills" name="skills" class="input-field" placeholder="e.g. JavaScript, React, Node.js, AWS">
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="experience_level" class="block text-sm font-medium text-gray-700 mb-1">Experience Level (years) *</label>
+                                        <input type="number" id="experience_level" name="experience_level" min="0" max="20" required class="input-field" placeholder="e.g. 5">
+                                    </div>
+
+                                    <div>
+                                        <label for="employment_type" class="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                                        <select id="employment_type" name="employment_type" class="input-field">
+                                            <option value="Full-time">Full-time</option>
+                                            <option value="Part-time">Part-time</option>
+                                            <option value="Contract">Contract</option>
+                                            <option value="Remote">Remote</option>
+                                            <option value="Hybrid">Hybrid</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                        <input type="text" id="location" name="location" class="input-field" placeholder="e.g. New York, NY or Remote">
+                                    </div>
+
+                                    <div>
+                                        <label for="salary_range" class="block text-sm font-medium text-gray-700 mb-1">Salary Range</label>
+                                        <input type="text" id="salary_range" name="salary_range" class="input-field" placeholder="e.g. $80,000 - $120,000">
+                                    </div>
+                                </div>
+
+                                <div class="pt-6 border-t border-gray-200">
+                                    <button type="submit" class="w-full btn-primary py-3 text-lg">
+                                        Create Job Posting
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('create-job-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value,
+                    requirements: document.getElementById('requirements').value,
+                    skills: document.getElementById('skills').value.split(',').map(s => s.trim()),
+                    experience_level: parseInt(document.getElementById('experience_level').value),
+                    employment_type: document.getElementById('employment_type').value,
+                    location: document.getElementById('location').value,
+                    salary_range: document.getElementById('salary_range').value
+                };
+                
+                const errorDiv = document.getElementById('create-job-error');
+                const errorMessage = document.getElementById('error-message');
+                
+                try {
+                    const data = await apiCall('/jobs', {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    // Redirect to job details page
+                    navigateTo(`employer/jobs/${data.job.id}`);
+                } catch (error) {
+                    errorMessage.textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+        }
+
+        function loadJobDetailsPage(container, jobId) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-8">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="mb-6">
+                            <a href="employer/jobs" class="text-blue-600 hover:text-blue-800 flex items-center">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Back to Jobs
+                            </a>
+                        </div>
+
+                        <div class="card mb-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h1 class="text-2xl font-bold text-gray-900" id="job-title">Loading...</h1>
+                                    <div class="flex items-center mt-2 text-gray-600">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>
+                                        <span id="job-location">-</span>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-briefcase mr-2"></i>
+                                        <span id="job-type">-</span>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock mr-2"></i>
+                                        <span id="job-experience">- years</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span id="job-status" class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">-</span>
+                                    <a href="employer/jobs/${jobId}/candidates" class="btn-primary text-sm">
+                                        View Candidates
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                                <div class="md:col-span-2">
+                                    <div class="mb-6">
+                                        <h2 class="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
+                                        <p id="job-description" class="text-gray-700 whitespace-pre-line">Loading...</p>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <h2 class="text-lg font-semibold text-gray-900 mb-2">Requirements</h2>
+                                        <p id="job-requirements" class="text-gray-700 whitespace-pre-line">Loading...</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                                        <h3 class="font-semibold text-blue-800 mb-2">Key Skills</h3>
+                                        <div id="job-skills" class="flex flex-wrap gap-2">
+                                            <!-- Skills will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <h3 class="font-semibold text-gray-800 mb-3">Job Details</h3>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Salary Range:</span>
+                                                <span id="job-salary" class="font-medium">-</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Posted:</span>
+                                                <span id="job-posted" class="font-medium">-</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Matches:</span>
+                                                <span id="job-matches" class="font-medium">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            loadJobDetails(jobId);
+        }
+
+        async function loadJobDetails(jobId) {
+            try {
+                const jobData = await apiCall(`/jobs/${jobId}`);
+                const job = jobData.job;
+                
+                document.getElementById('job-title').textContent = job.title;
+                document.getElementById('job-location').textContent = job.location || 'Not specified';
+                document.getElementById('job-type').textContent = job.employment_type || 'Not specified';
+                document.getElementById('job-experience').textContent = `${job.experience_level || 0} years`;
+                document.getElementById('job-description').textContent = job.description || 'No description provided';
+                document.getElementById('job-requirements').textContent = job.requirements || 'No requirements provided';
+                document.getElementById('job-salary').textContent = job.salary_range || 'Not specified';
+                document.getElementById('job-posted').textContent = new Date(job.created_at).toLocaleDateString();
+                document.getElementById('job-status').textContent = job.status;
+                document.getElementById('job-status').className = `px-3 py-1 rounded-full text-sm font-medium ${
+                    job.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`;
+                
+                // Update skills
+                const skillsContainer = document.getElementById('job-skills');
+                if (job.skills && job.skills.length > 0) {
+                    skillsContainer.innerHTML = job.skills.map(skill => 
+                        `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${skill}</span>`
+                    ).join('');
+                } else {
+                    skillsContainer.innerHTML = '<span class="text-gray-500 text-sm">No skills specified</span>';
+                }
+                
+                // Get match count
+                try {
+                    const matchData = await apiCall(`/matching/jobs/${jobId}/candidates/count`);
+                    document.getElementById('job-matches').textContent = matchData.total_matching_candidates || 0;
+                } catch (error) {
+                    document.getElementById('job-matches').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Failed to load job details:', error);
+            }
+        }
+
+        function loadAdminDashboard(container) {
+            container.innerHTML = `
+                <div class="min-h-screen bg-gray-50 py-8">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                            <p class="text-gray-600 mt-2">Platform administration and management.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-blue-50 text-blue-600 mr-4">
+                                    <i class="fas fa-file-alt text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total CVs</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="total-cvs">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-green-50 text-green-600 mr-4">
+                                    <i class="fas fa-check-circle text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Processed CVs</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="processed-cvs">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-purple-50 text-purple-600 mr-4">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Employers</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="total-employers">0</p>
+                                </div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="p-3 rounded-lg bg-orange-50 text-orange-600 mr-4">
+                                    <i class="fas fa-briefcase text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Active Jobs</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="active-jobs">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="card">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-4">CV Management</h2>
+                                <p class="text-gray-600 mb-4">Upload and process CVs in the system.</p>
+                                <a href="admin/cv-management" class="btn-primary inline-flex items-center">
+                                    <i class="fas fa-cog mr-2"></i>
+                                    Manage CVs
+                                </a>
+                            </div>
+
+                            <div class="card">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-4">System Health</h2>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-600">API Status</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Operational</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-600">Database</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Connected</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-600">Embedding Service</span>
+                                        <span id="embedding-status" class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">Checking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            loadAdminDashboardData();
+        }
+
+        async function loadAdminDashboardData() {
+            try {
+                // In a real implementation, you would have admin API endpoints
+                // For now, we'll use placeholder data
+                document.getElementById('total-cvs').textContent = '1,247';
+                document.getElementById('processed-cvs').textContent = '1,189';
+                document.getElementById('total-employers').textContent = '342';
+                document.getElementById('active-jobs').textContent = '156';
+                document.getElementById('embedding-status').textContent = 'Operational';
+                document.getElementById('embedding-status').className = 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full';
+            } catch (error) {
+                console.error('Failed to load admin dashboard data:', error);
+            }
+        }
+    </script>
+</body>
+</html>

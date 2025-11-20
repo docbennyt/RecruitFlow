@@ -36,13 +36,29 @@ pool.connect((err) => {
   }
 });
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/cv', require('./routes/cv'));
-app.use('/api/jobs', require('./routes/jobs'));
-app.use('/api/matching', require('./routes/matching'));
-app.use('/api/payments', require('./routes/payments'));
-app.use('/api/admin', require('./routes/admin'));
+// Routes - mount only if the module exports an Express router / middleware
+function safeMount(path, modPath) {
+  try {
+    const route = require(modPath);
+    // Express routers are functions with a 'stack' array; middleware is a function
+    const isRouter = route && (typeof route === 'function' || Array.isArray(route.stack));
+    if (isRouter) {
+      app.use(path, route);
+      console.log('Mounted', path, '->', modPath);
+    } else {
+      console.log('Skipping mount for', path, '- module did not export a router/middleware:', modPath);
+    }
+  } catch (err) {
+    console.warn('Failed to mount', path, 'from', modPath, err && err.message);
+  }
+}
+
+safeMount('/api/auth', './routes/auth');
+safeMount('/api/cv', './routes/cv');
+safeMount('/api/jobs', './routes/jobs');
+safeMount('/api/matching', './routes/matching');
+safeMount('/api/payments', './routes/payments');
+safeMount('/api/admin', './routes/admin');
 
 // Health check
 app.get('/health', (req, res) => {
